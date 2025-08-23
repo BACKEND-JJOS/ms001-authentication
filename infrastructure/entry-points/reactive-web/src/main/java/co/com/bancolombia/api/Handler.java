@@ -1,5 +1,7 @@
 package co.com.bancolombia.api;
 
+import co.com.bancolombia.model.user.User;
+import co.com.bancolombia.usecase.saveuser.SaveUserUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -9,21 +11,22 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 public class Handler {
-//private  final UseCase useCase;
-//private  final UseCase2 useCase2;
+    private  final SaveUserUseCase saveUserUseCase;
 
-    public Mono<ServerResponse> listenGETUseCase(ServerRequest serverRequest) {
-        // useCase.logic();
-        return ServerResponse.ok().bodyValue("");
-    }
-
-    public Mono<ServerResponse> listenGETOtherUseCase(ServerRequest serverRequest) {
-        // useCase2.logic();
-        return ServerResponse.ok().bodyValue("");
-    }
+    User user = new User(
+            null,
+            "John",
+            "Doe",
+            "john.doe@test.com",
+            "123456789",
+            "555-1234",
+            2,
+            1000.0
+    );
 
     public Mono<ServerResponse> listenPOSTUseCase(ServerRequest serverRequest) {
-        // useCase.logic();
-        return ServerResponse.ok().bodyValue("");
+        return saveUserUseCase.execute(user)
+                .flatMap(savedUser -> ServerResponse.ok().bodyValue(savedUser))
+                .switchIfEmpty(ServerResponse.badRequest().build());
     }
 }
