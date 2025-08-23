@@ -1,14 +1,12 @@
 server:
-  port: 8080
+  port: 8091
 spring:
   application:
     name: "ms001-authentication"
   devtools:
     add-properties: false
-  h2:
-    console:
-      enabled: true
-      path: "/h2"
+  webflux:
+    base-path: "/api"
   profiles:
     include: null
 management:
@@ -20,5 +18,12 @@ management:
     health:
       probes:
         enabled: true
+adapters:
+  r2dbc:
+    host: localhost
+    port: 3306
+    database: ms001_authentication_db
+    username: root
+    password: root
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
