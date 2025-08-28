@@ -32,6 +32,8 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
 
     private Mono<ServerResponse> customErrorResponse(ServerRequest request) {
         Throwable error = getError(request);
+        log.error("MESSAGE_EXCEPTION_LOG_TRACE : Handling exception - {}", error.toString());
+
         HttpStatus status;
 
         if (error instanceof BusinessException) {
