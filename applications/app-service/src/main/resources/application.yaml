@@ -1,5 +1,10 @@
 server:
   port: 8091
+springdoc:
+  swagger-ui:
+    path: "/doc/swagger-ui/index.html"
+  api-docs:
+    path: "/doc/api-docs"
 spring:
   application:
     name: "ms001-authentication"
