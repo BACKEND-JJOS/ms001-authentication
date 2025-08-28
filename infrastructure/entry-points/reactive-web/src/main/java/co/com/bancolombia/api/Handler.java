@@ -25,7 +25,7 @@ public class Handler {
 
 
     public Mono<ServerResponse> listenPOSTCreateUserUseCase(ServerRequest serverRequest) {
-        log.debug("MESSAGE_HANDLER_LOG_TRACE : INIT METHOD USER CREATE");
+        log.info("MESSAGE_HANDLER_LOG_TRACE : INIT METHOD USER CREATE");
         return serverRequest.bodyToMono(UserRequest.class)
                 .flatMap(GenericValidator::validate)
                 .map(UserRequestMapper::toDomain)
@@ -40,10 +40,9 @@ public class Handler {
 
     public Mono<ServerResponse> listenGETFilteredUserByIdentificationUseCase(ServerRequest serverRequest){
         String identification = serverRequest.pathVariable("identification");
-        log.debug("MESSAGE_HANDLER_LOG_TRACE : INIT METHOD FILTER USER BY IDENTIFICATION");
+        log.info("MESSAGE_HANDLER_LOG_TRACE : INIT METHOD FILTER USER BY IDENTIFICATION");
 
         return filterUserByIdentificationUseCase.execute(identification)
-                .doOnSubscribe(sub -> log.info("MESSAGE_HANDLER_LOG_TRACE : Searching user with identification={}", identification))
                 .doOnSuccess(user -> log.info("MESSAGE_HANDLER_LOG_TRACE : User found with identification={}", identification))
                 .doOnError(err -> log.error("MESSAGE_HANDLER_LOG_TRACE : Error searching user with identification={} - {}", identification, err.getMessage()))
                 .flatMap(user -> buildResponse(user, HttpStatus.OK.value(), RESPONSE_OK))

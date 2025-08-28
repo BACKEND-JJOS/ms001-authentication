@@ -15,12 +15,18 @@ public class SaveUserUseCase {
     public Mono<User> execute(User user) {
         return userRepository.findByEmail(user.getEmail())
                 .hasElement()
-                .flatMap(exists ->
-                        exists
-                                ? Mono.error(new BusinessException("User already exists"))
-                                : userRepository.save(user)
+                .flatMap(emailExists -> emailExists
+                        ? Mono.error(new BusinessException("User email already exists"))
+                        : Mono.just(user))
+                .flatMap(userValidateWithoutEmail -> userRepository.findByIdentification(userValidateWithoutEmail.getIdentityDocument())
+                        .hasElement()
+                        .flatMap(idExists -> idExists
+                                ? Mono.error(new BusinessException("User identification already exists"))
+                                : userRepository.save(userValidateWithoutEmail)
+                        )
                 );
     }
+
 
 
 
