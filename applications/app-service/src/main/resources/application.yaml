@@ -25,10 +25,10 @@ management:
         enabled: true
 adapters:
   r2dbc:
-    host: localhost
+    host: "localhost"
     port: 3306
-    database: ms001_authentication_db
-    username: root
-    password: root
+    database: "ms001_authentication_db"
+    username: "root"
+    password: "root"
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
