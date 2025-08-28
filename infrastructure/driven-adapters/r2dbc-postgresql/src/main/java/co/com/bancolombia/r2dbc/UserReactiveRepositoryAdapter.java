@@ -44,4 +44,19 @@ public class UserReactiveRepositoryAdapter
                 .map(this::toEntity);
     }
 
+    @Override
+    public Mono<User> findByIdentification(String identification) {
+        return repository.findByIdentityDocument(identification)
+                .doOnSubscribe(sub -> log.debug("MESSAGE_ADAPTER_LOG_TRACE : INIT findByIdentityDocument - id={}", identification))
+                .doOnSuccess(user -> {
+                    if (user != null) {
+                        log.info("MESSAGE_ADAPTER_LOG_TRACE : User found identification={}", identification);
+                    } else {
+                        log.info("MESSAGE_ADAPTER_LOG_TRACE : No user found identification={}", identification);
+                    }
+                })
+                .doOnError(err -> log.error("MESSAGE_ADAPTER_LOG_TRACE : DB error while searching user identification={} - {}", identification, err.getMessage()))
+                .map(this::toEntity);
+    }
+
 }

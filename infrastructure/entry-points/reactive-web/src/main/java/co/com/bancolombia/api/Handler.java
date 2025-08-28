@@ -4,7 +4,7 @@ import co.com.bancolombia.api.mapper.UserRequestMapper;
 import co.com.bancolombia.api.request.UserRequest;
 import co.com.bancolombia.api.response.ApiResponse;
 import co.com.bancolombia.api.validator.GenericValidator;
-import co.com.bancolombia.model.user.User;
+import co.com.bancolombia.usecase.filteruserbyidentification.FilterUserByIdentificationUseCase;
 import co.com.bancolombia.usecase.saveuser.SaveUserUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,8 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class Handler {
 
-    private  final SaveUserUseCase saveUserUseCase;
+    private final SaveUserUseCase saveUserUseCase;
+    private final FilterUserByIdentificationUseCase filterUserByIdentificationUseCase;
     private static final String RESPONSE_OK = "Response Ok";
 
 
@@ -35,6 +36,18 @@ public class Handler {
                             .doOnError(err -> log.error("MESSAGE_HANDLER_LOG_TRACE : Error while creating user with email={} - {}", user.getEmail(), err.getMessage()))
                             .flatMap(savedUser -> buildResponse(savedUser, HttpStatus.CREATED.value(), RESPONSE_OK));
                 });
+    }
+
+    public Mono<ServerResponse> listenGETFilteredUserByIdentificationUseCase(ServerRequest serverRequest){
+        String identification = serverRequest.pathVariable("identification");
+        log.debug("MESSAGE_HANDLER_LOG_TRACE : INIT METHOD FILTER USER BY IDENTIFICATION");
+
+        return filterUserByIdentificationUseCase.execute(identification)
+                .doOnSubscribe(sub -> log.info("MESSAGE_HANDLER_LOG_TRACE : Searching user with identification={}", identification))
+                .doOnSuccess(user -> log.info("MESSAGE_HANDLER_LOG_TRACE : User found with identification={}", identification))
+                .doOnError(err -> log.error("MESSAGE_HANDLER_LOG_TRACE : Error searching user with identification={} - {}", identification, err.getMessage()))
+                .flatMap(user -> buildResponse(user, HttpStatus.OK.value(), RESPONSE_OK))
+                .switchIfEmpty(buildResponse(null, HttpStatus.NOT_FOUND.value(), "The user does not exist"));
     }
 
 

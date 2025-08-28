@@ -22,6 +22,9 @@ public class RouterRest {
                 .POST("/v1/user",
                         handler::listenPOSTCreateUserUseCase,
                         OpenApiDoc::createService)
+                .GET("/v1/user/{identification}",
+                        handler::listenGETFilteredUserByIdentificationUseCase,
+                        OpenApiDoc::createService) //TODO: Ajustar api doc
                 .build();
     }
 }
