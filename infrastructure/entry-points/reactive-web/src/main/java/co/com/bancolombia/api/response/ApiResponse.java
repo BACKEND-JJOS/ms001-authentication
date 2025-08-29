@@ -1,16 +1,15 @@
 package co.com.bancolombia.api.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Mono;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse <T>{
     private T data;
-    private int status;
-    private String message;
+    private String code;
 }

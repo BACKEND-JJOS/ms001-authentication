@@ -1,8 +1,15 @@
 package co.com.bancolombia.api.exceptions;
 
+import lombok.Getter;
 
+@Getter
 public class ValidationException extends RuntimeException {
-    public ValidationException(String message) {
+
+    private final String code;
+
+    public ValidationException(String message, String code) {
         super(message);
+        this.code = code;
+
     }
 }

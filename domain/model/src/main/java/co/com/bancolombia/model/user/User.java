@@ -1,6 +1,8 @@
 package co.com.bancolombia.model.user;
 
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -19,5 +21,5 @@ public class User {
     private String phone;
     private String email;
     private Integer idRole;
-    private Double baseSalary;
+    private BigDecimal baseSalary;
 }

@@ -3,6 +3,7 @@ package co.com.bancolombia.api.validator;
 
 
 import co.com.bancolombia.api.exceptions.ValidationException;
+import co.com.bancolombia.model.responsecode.ResponseCode;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -21,7 +22,7 @@ public class GenericValidator {
         Set<ConstraintViolation<T>> violations = validator.validate(object);
         return violations.isEmpty()
                 ? Mono.just(object)
-                : Mono.error(new ValidationException("Validation errors: " + formatErrors(violations)));
+                : Mono.error(new ValidationException("Validation errors: " + formatErrors(violations), ResponseCode.DATA_CORRUPTED));
     }
 
     private static <T> String formatErrors(Set<ConstraintViolation<T>> violations) {

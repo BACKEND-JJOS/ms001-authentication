@@ -2,7 +2,6 @@ package co.com.bancolombia.api.openapidoc;
 
 import co.com.bancolombia.api.request.UserRequest;
 import co.com.bancolombia.api.response.ApiResponse;
-import co.com.bancolombia.model.user.User;
 import lombok.experimental.UtilityClass;
 import org.springdoc.core.fn.builders.operation.Builder;
 import org.springframework.http.HttpStatus;

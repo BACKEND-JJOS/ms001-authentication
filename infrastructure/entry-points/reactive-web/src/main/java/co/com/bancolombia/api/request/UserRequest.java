@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -43,5 +44,5 @@ public class UserRequest {
     @NotNull(message = "base salary is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "base salary must be >= 0")
     @DecimalMax(value = "15000000.0", inclusive = true, message = "base salary must be <= 15000000")
-    private Double baseSalary;
+    private BigDecimal baseSalary;
 }

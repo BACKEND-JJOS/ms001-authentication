@@ -4,6 +4,7 @@ import co.com.bancolombia.api.mapper.UserRequestMapper;
 import co.com.bancolombia.api.request.UserRequest;
 import co.com.bancolombia.api.response.ApiResponse;
 import co.com.bancolombia.api.validator.GenericValidator;
+import co.com.bancolombia.model.responsecode.ResponseCode;
 import co.com.bancolombia.usecase.filteruserbyidentification.FilterUserByIdentificationUseCase;
 import co.com.bancolombia.usecase.saveuser.SaveUserUseCase;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,6 @@ public class Handler {
 
     private final SaveUserUseCase saveUserUseCase;
     private final FilterUserByIdentificationUseCase filterUserByIdentificationUseCase;
-    private static final String RESPONSE_OK = "Response Ok";
 
 
     public Mono<ServerResponse> listenPOSTCreateUserUseCase(ServerRequest serverRequest) {
@@ -34,7 +34,7 @@ public class Handler {
                     return saveUserUseCase.execute(user)
                             .doOnSuccess(u -> log.info("MESSAGE_HANDLER_LOG_TRACE : Successfully created user with id={}", u.getIdUser()))
                             .doOnError(err -> log.error("MESSAGE_HANDLER_LOG_TRACE : Error while creating user with email={} - {}", user.getEmail(), err.getMessage()))
-                            .flatMap(savedUser -> buildResponse(savedUser, HttpStatus.CREATED.value(), RESPONSE_OK));
+                            .flatMap(savedUser -> buildResponse(savedUser, HttpStatus.CREATED.value(), ResponseCode.USER_CREATED_SUCCESSFULLY));
                 });
     }
 
@@ -45,8 +45,8 @@ public class Handler {
         return filterUserByIdentificationUseCase.execute(identification)
                 .doOnSuccess(user -> log.info("MESSAGE_HANDLER_LOG_TRACE : User found with identification={}", identification))
                 .doOnError(err -> log.error("MESSAGE_HANDLER_LOG_TRACE : Error searching user with identification={} - {}", identification, err.getMessage()))
-                .flatMap(user -> buildResponse(user, HttpStatus.OK.value(), RESPONSE_OK))
-                .switchIfEmpty(buildResponse(null, HttpStatus.NOT_FOUND.value(), "The user does not exist"));
+                .flatMap(user -> buildResponse(user, HttpStatus.OK.value(), ResponseCode.USER_FILTERED_SUCCESSFULLY))
+                .switchIfEmpty(buildResponse(null, HttpStatus.NOT_FOUND.value(), ResponseCode.USER_NOT_EXISTS));
     }
 
 
@@ -54,8 +54,7 @@ public class Handler {
         return ServerResponse.status(status).bodyValue(
                 ApiResponse.<T>builder()
                         .data(data)
-                        .status(status)
-                        .message(message)
+                        .code(message)
                         .build()
         );
     }

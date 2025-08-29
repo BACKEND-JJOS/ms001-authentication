@@ -1,13 +1,15 @@
 package co.com.bancolombia.r2dbc;
 
+import co.com.bancolombia.model.exceptions.TechnicalException;
+import co.com.bancolombia.model.responsecode.ResponseCode;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.gateways.UserRepository;
 import co.com.bancolombia.r2dbc.entity.UserEntity;
 import co.com.bancolombia.r2dbc.helper.ReactiveAdapterOperations;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -22,11 +24,13 @@ public class UserReactiveRepositoryAdapter
     }
 
     @Override
+    @Transactional
     public Mono<User> save(User user) {
         log.debug("MESSAGE_ADAPTER_LOG_TRACE: INIT save user email={}", user.getEmail());
         return super.save(user)
                 .doOnSuccess(saved -> log.info("MESSAGE_ADAPTER_LOG_TRACE : User saved email={}", saved.getEmail()))
-                .doOnError(err -> log.error("MESSAGE_ADAPTER_LOG_TRACE : DB error while saving user email={} - {}", user.getEmail(), err.getMessage()));
+                .doOnError(err -> log.error("MESSAGE_ADAPTER_LOG_TRACE : DB error while saving user email={} - {}", user.getEmail(), err.getMessage()))
+                .onErrorMap(throwable -> new TechnicalException(ResponseCode.DATA_BASE_FAILED));
     }
 
     @Override
@@ -40,8 +44,11 @@ public class UserReactiveRepositoryAdapter
                         log.info("MESSAGE_ADAPTER_LOG_TRACE : No user found email={}", email);
                     }
                 })
-                .doOnError(err -> log.error("MESSAGE_ADAPTER_LOG_TRACE : DB error while searching user email={} - {}", email, err.getMessage()))
-                .map(this::toEntity);
+                .map(this::toEntity)
+                .onErrorMap(throwable -> {
+                    log.error("MESSAGE_ADAPTER_LOG_TRACE : DB error while searching user email={} - {}", email, throwable.getMessage());
+                    return new TechnicalException(ResponseCode.DATA_BASE_FAILED);
+                });
     }
 
     @Override
@@ -55,8 +62,11 @@ public class UserReactiveRepositoryAdapter
                         log.info("MESSAGE_ADAPTER_LOG_TRACE : No user found identification={}", identification);
                     }
                 })
-                .doOnError(err -> log.error("MESSAGE_ADAPTER_LOG_TRACE : DB error while searching user identification={} - {}", identification, err.getMessage()))
-                .map(this::toEntity);
+                .map(this::toEntity)
+                .onErrorMap(throwable -> {
+                    log.error("MESSAGE_ADAPTER_R2DBC_LOG_TRACE : DB error while finding user by identification ={} - {}",identification, throwable.getMessage());
+                    return new TechnicalException(ResponseCode.DATA_BASE_FAILED);
+                });
     }
 
 }
