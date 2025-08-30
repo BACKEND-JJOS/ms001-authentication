@@ -28,8 +28,8 @@ public class Handler {
         log.info("MESSAGE_HANDLER_LOG_TRACE : INIT METHOD USER CREATE");
         return serverRequest.bodyToMono(UserRequest.class)
                 .flatMap(GenericValidator::validate)
-                .map(UserRequestMapper::toDomain)
-                .flatMap(user -> {
+                .flatMap(userRequest -> {
+                    var user =  UserRequestMapper.toDomain(userRequest);
                     log.info("MESSAGE_HANDLER_LOG_TRACE : Received request to create user with email={}", user.getEmail());
                     return saveUserUseCase.execute(user)
                             .doOnSuccess(u -> log.info("MESSAGE_HANDLER_LOG_TRACE : Successfully created user with id={}", u.getIdUser()))
