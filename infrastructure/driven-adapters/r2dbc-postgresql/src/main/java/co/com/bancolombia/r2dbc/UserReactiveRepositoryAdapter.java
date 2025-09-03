@@ -6,6 +6,7 @@ import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.gateways.UserRepository;
 import co.com.bancolombia.r2dbc.entity.UserEntity;
 import co.com.bancolombia.r2dbc.helper.ReactiveAdapterOperations;
+import co.com.bancolombia.r2dbc.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
@@ -27,7 +28,10 @@ public class UserReactiveRepositoryAdapter
     @Transactional
     public Mono<User> save(User user) {
         log.debug("MESSAGE_ADAPTER_LOG_TRACE: INIT save user email={}", user.getEmail());
-        return super.save(user)
+        return Mono.just(user)
+                .map(UserMapper::toEntity)
+                .flatMap(repository::save)
+                .map(entity -> UserMapper.toDomain(entity, user.getRol()))
                 .doOnSuccess(saved -> log.info("MESSAGE_ADAPTER_LOG_TRACE : User saved email={}", saved.getEmail()))
                 .doOnError(err -> log.error("MESSAGE_ADAPTER_LOG_TRACE : DB error while saving user email={} - {}", user.getEmail(), err.getMessage()))
                 .onErrorMap(throwable -> new TechnicalException(ResponseCode.DATA_BASE_FAILED));
@@ -44,7 +48,7 @@ public class UserReactiveRepositoryAdapter
                         log.info("MESSAGE_ADAPTER_LOG_TRACE : No user found email={}", email);
                     }
                 })
-                .map(this::toEntity)
+                .map(UserMapper::toDomain)
                 .onErrorMap(throwable -> {
                     log.error("MESSAGE_ADAPTER_LOG_TRACE : DB error while searching user email={} - {}", email, throwable.getMessage());
                     return new TechnicalException(ResponseCode.DATA_BASE_FAILED);

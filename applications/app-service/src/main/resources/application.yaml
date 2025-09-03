@@ -32,3 +32,10 @@ adapters:
     password: "root"
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+
+security:
+  jwt:
+    key:
+      private: a01aafbfe92bcef60384cb19fdb8812ad61504e95510f71b5a28c575721ef13c
+    user:
+      generator: AUTH_JWT_BACKEND

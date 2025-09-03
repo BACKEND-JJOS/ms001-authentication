@@ -1,7 +1,7 @@
 package co.com.bancolombia.api.exceptions;
 
-import co.com.bancolombia.api.response.ApiResponse;
 import co.com.bancolombia.model.exceptions.BusinessException;
+import co.com.bancolombia.model.exceptions.BusinessUnAuthorizedException;
 import co.com.bancolombia.model.exceptions.TechnicalException;
 import co.com.bancolombia.model.responsecode.ResponseCode;
 import lombok.extern.slf4j.Slf4j;
@@ -37,32 +37,22 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
         Throwable error = getError(request);
         log.error("MESSAGE_EXCEPTION_LOG_TRACE : Handling exception - {}", error.toString());
 
-        HttpStatus status;
-        String code = ResponseCode.TECHNICAL_ERROR;
-        Object data = null;
+        HttpStatus status = ExceptionHttpStatusMapper.resolveHttpStatus(error);
 
-        if (error instanceof BusinessException) {
-            status = HttpStatus.BAD_REQUEST;
-            code = ((BusinessException) error).getCode();
-        } else if (error instanceof TechnicalException) {
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-            code = ((TechnicalException) error).getCode();
-        } else if (error instanceof ValidationException) {
-            status = HttpStatus.BAD_REQUEST;
-            code = ((ValidationException) error).getCode();
-            data = error.getMessage();
-        }else {
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-
-        ApiResponse<Object> errorResponse = ApiResponse.builder()
-                .code(code)
-                .data(data)
-                .build();
+        String code = resolveErrorCode(error);
+        Object data = (error instanceof ValidationException ve) ? ve.getMessage() : null;
 
         return ServerResponse
                 .status(status)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(errorResponse);
+                .bodyValue(ExceptionResponseBuilder.buildResponse(code, data));
+    }
+    private String resolveErrorCode(Throwable error) {
+        if (error instanceof BusinessException be) return be.getCode();
+        if (error instanceof TechnicalException te)return te.getCode();
+        if (error instanceof ValidationException ve) return ve.getCode();
+        if (error instanceof BusinessUnAuthorizedException ue) return ue.getCode();
+        if (error instanceof ForbiddenUnAuthorizedException fe) return fe.getCode();
+        return ResponseCode.TECHNICAL_ERROR;
     }
 }

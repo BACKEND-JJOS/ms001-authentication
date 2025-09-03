@@ -18,7 +18,7 @@ public class UserEntity {
 
     @Id
     @Column("id_usuario")
-    private Integer idUser;
+    private Long idUser;
 
     @Column("nombres")
     private String names;
@@ -42,8 +42,11 @@ public class UserEntity {
     private String email;
 
     @Column("id_rol")
-    private Integer idRol;
+    private Long idRol;
 
     @Column("salario_base")
     private BigDecimal baseSalary;
+
+    @Column("password")
+    private String password;
 }

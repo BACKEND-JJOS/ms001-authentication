@@ -2,6 +2,7 @@ package co.com.bancolombia.api.mapper;
 
 import co.com.bancolombia.api.request.UserRequest;
 import co.com.bancolombia.model.user.User;
+import co.com.bancolombia.model.rol.Rol;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -21,8 +22,13 @@ public class UserRequestMapper {
                 .address(request.getAddress())
                 .phone(request.getPhone())
                 .email(request.getEmail())
-                .idRole(null)
+                .rol(
+                        Rol.builder()
+                                .idRol(request.getIdRol())
+                                .build()
+                )
                 .baseSalary(request.getBaseSalary())
+                .password(request.getPassword())
                 .build();
     }
 }

@@ -1,19 +1,28 @@
 package co.com.bancolombia.api;
 
+import co.com.bancolombia.api.auth.JwtUtils;
+import co.com.bancolombia.api.auth.PasswordUtils;
+import co.com.bancolombia.model.exceptions.BusinessUnAuthorizedException;
 import co.com.bancolombia.api.mapper.UserRequestMapper;
+import co.com.bancolombia.api.request.UserLoginRequest;
 import co.com.bancolombia.api.request.UserRequest;
 import co.com.bancolombia.api.response.ApiResponse;
 import co.com.bancolombia.api.validator.GenericValidator;
 import co.com.bancolombia.model.responsecode.ResponseCode;
+import co.com.bancolombia.usecase.authuser.AuthUserUseCase;
 import co.com.bancolombia.usecase.filteruserbyidentification.FilterUserByIdentificationUseCase;
 import co.com.bancolombia.usecase.saveuser.SaveUserUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
+
 
 @Component
 @RequiredArgsConstructor
@@ -21,7 +30,10 @@ import reactor.core.publisher.Mono;
 public class Handler {
 
     private final SaveUserUseCase saveUserUseCase;
+    private final AuthUserUseCase authUserUseCase;
     private final FilterUserByIdentificationUseCase filterUserByIdentificationUseCase;
+    private final JwtUtils jwtUtil;
+    private final PasswordUtils passwordUtils;
 
 
     public Mono<ServerResponse> listenPOSTCreateUserUseCase(ServerRequest serverRequest) {
@@ -30,6 +42,7 @@ public class Handler {
                 .flatMap(GenericValidator::validate)
                 .flatMap(userRequest -> {
                     var user =  UserRequestMapper.toDomain(userRequest);
+                    user.setPassword(passwordUtils.encode(user.getPassword()));
                     log.info("MESSAGE_HANDLER_LOG_TRACE : Received request to create user with email={}", user.getEmail());
                     return saveUserUseCase.execute(user)
                             .doOnSuccess(u -> log.info("MESSAGE_HANDLER_LOG_TRACE : Successfully created user with id={}", u.getIdUser()))
@@ -49,6 +62,29 @@ public class Handler {
                 .switchIfEmpty(buildResponse(null, HttpStatus.NOT_FOUND.value(), ResponseCode.USER_NOT_EXISTS));
     }
 
+    public Mono<ServerResponse> listenPOSTLogin(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(UserLoginRequest.class)
+                .flatMap(GenericValidator::validate)
+                .flatMap(userLoginRequest -> authUserUseCase.authenticate(userLoginRequest.getEmail())
+                        .flatMap(user -> {
+                            if (!passwordUtils.matches(userLoginRequest.getPassword(), user.getPassword())) {
+                                return Mono.error(new BusinessUnAuthorizedException(ResponseCode.INVALID_CREDENTIALS));
+                            }
+                            var dataTokenResponse = Map.of(
+                                    "token",
+                                    jwtUtil.createToken(
+                                            user.getEmail(),
+                                            user.getRol().getName(),
+                                            user.getIdentityDocument(),
+                                            AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_" + user.getRol().getName())
+                                    ),
+                                    "tokenType",
+                                    "Bearer");
+                            return buildResponse(dataTokenResponse, HttpStatus.OK.value(), ResponseCode.USER_LOGIN_SUCCESSFULLY);
+
+                        })
+                );
+    }
 
     private <T> Mono<ServerResponse> buildResponse(T data, int status, String message) {
         return ServerResponse.status(status).bodyValue(
@@ -58,4 +94,8 @@ public class Handler {
                         .build()
         );
     }
+
+
+
+
 }

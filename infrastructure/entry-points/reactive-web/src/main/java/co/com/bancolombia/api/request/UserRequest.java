@@ -45,4 +45,10 @@ public class UserRequest {
     @DecimalMin(value = "0.0", inclusive = true, message = "base salary must be >= 0")
     @DecimalMax(value = "15000000.0", inclusive = true, message = "base salary must be <= 15000000")
     private BigDecimal baseSalary;
+
+    @NotBlank(message = "password is required")
+    private String password;
+
+    @NotNull(message = "id rol is required")
+    private Long idRol;
 }

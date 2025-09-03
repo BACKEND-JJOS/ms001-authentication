@@ -23,10 +23,13 @@ CREATE TABLE usuario (
     telefono VARCHAR(20) NOT NULL,
     correo_electronico VARCHAR(100) NOT NULL UNIQUE,
     id_rol INT NULL,
-    salario_base DECIMAL(15,2) NOT NULL
+    salario_base DECIMAL(15,2) NOT NULL,
+    password VARCHAR(250) NOT NULL,
+    CONSTRAINT fk_usuario_rol FOREIGN KEY (id_rol) REFERENCES rol(id_rol)
 );
-
 
 -- Inserts iniciales en tabla rol
 INSERT INTO rol (nombre, descripcion) VALUES ('ADMIN', 'Administrador del sistema');
-INSERT INTO rol (nombre, descripcion) VALUES ('USER', 'Usuario estándar solicitante de credito');
+INSERT INTO rol (nombre, descripcion) VALUES ('ASESOR', 'Usuario asesor del sistema');
+INSERT INTO rol (nombre, descripcion) VALUES ('CLIENTE', 'Usuario cliente del sistema');
+

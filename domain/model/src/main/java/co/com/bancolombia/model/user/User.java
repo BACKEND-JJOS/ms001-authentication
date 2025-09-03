@@ -1,5 +1,6 @@
 package co.com.bancolombia.model.user;
 
+import co.com.bancolombia.model.rol.Rol;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 public class User {
 
-    private Integer idUser;
+    private Long idUser;
     private String names;
     private String lastNames;
     private LocalDate dateBirth;
@@ -20,6 +21,7 @@ public class User {
     private String address;
     private String phone;
     private String email;
-    private Integer idRole;
+    private Rol rol;
     private BigDecimal baseSalary;
+    private String password;
 }
