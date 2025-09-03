@@ -13,6 +13,7 @@ import static org.springdoc.webflux.core.fn.SpringdocRouteBuilder.route;
 public class RouterRest {
 
     public static final String BASE_PATH_USER = "/v1/user";
+    private static final String BASE_PATH_AUTH_ROUTE = "/v1/auth/login";
 
     @Bean
     public WebProperties.Resources  resources(){return new WebProperties.Resources();}
@@ -21,6 +22,9 @@ public class RouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route()
+                .POST(BASE_PATH_AUTH_ROUTE,
+                        handler::listenPOSTLogin,
+                        OpenApiDoc::createUser) //TODO:Crear api doc
                 .POST(BASE_PATH_USER,
                         handler::listenPOSTCreateUserUseCase,
                         OpenApiDoc::createUser)

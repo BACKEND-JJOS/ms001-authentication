@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 @ToString
-
 public class UserRequest {
     @NotBlank(message = "names is required")
     private String names;

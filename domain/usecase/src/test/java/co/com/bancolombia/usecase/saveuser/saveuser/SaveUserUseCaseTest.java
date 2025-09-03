@@ -2,6 +2,8 @@ package co.com.bancolombia.usecase.saveuser.saveuser;
 
 import co.com.bancolombia.model.exceptions.BusinessException;
 import co.com.bancolombia.model.responsecode.ResponseCode;
+import co.com.bancolombia.model.rol.Rol;
+import co.com.bancolombia.model.rol.gateways.RolRepository;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.gateways.UserRepository;
 import co.com.bancolombia.usecase.saveuser.SaveUserUseCase;
@@ -24,15 +26,21 @@ class SaveUserUseCaseTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private RolRepository rolRepository;
+
     @InjectMocks
     private SaveUserUseCase saveUserUseCase;
 
     private User newUser;
     private User existingByEmail;
     private User existingByIdentification;
+    private Rol adminRol;
 
     @BeforeEach
     void setUp() {
+        adminRol = new Rol(1L, "ADMIN", "Administrador del sistema");
+
         newUser = User.builder()
                 .idUser(null)
                 .names("Jane")
@@ -40,29 +48,33 @@ class SaveUserUseCaseTest {
                 .email("jane.smith@example.com")
                 .identityDocument("12345678")
                 .baseSalary(new BigDecimal("8000.0"))
+                .rol(adminRol)
                 .build();
 
         existingByEmail = User.builder()
-                .idUser(1)
+                .idUser(1L)
                 .names("Jane")
                 .lastNames("Smith")
-                .email("jane.smith@example.com") // mismo correo
+                .email("jane.smith@example.com")
                 .identityDocument("87654321")
                 .baseSalary(new BigDecimal("8000.0"))
+                .rol(adminRol)
                 .build();
 
         existingByIdentification = User.builder()
-                .idUser(2)
+                .idUser(2L)
                 .names("John")
                 .lastNames("Doe")
                 .email("john.doe@example.com")
-                .identityDocument("12345678") // misma cédula
+                .identityDocument("12345678")
                 .baseSalary(new BigDecimal("8000.0"))
+                .rol(adminRol)
                 .build();
     }
 
     @Test
     void shouldSaveNewUserWhenNotExists() {
+        when(rolRepository.findById(newUser.getRol().getIdRol())).thenReturn(Mono.just(adminRol));
         when(userRepository.findByEmail(newUser.getEmail())).thenReturn(Mono.empty());
         when(userRepository.findByIdentification(newUser.getIdentityDocument())).thenReturn(Mono.empty());
         when(userRepository.save(newUser)).thenReturn(Mono.just(newUser));
@@ -75,7 +87,21 @@ class SaveUserUseCaseTest {
     }
 
     @Test
+    void shouldThrowBusinessExceptionWhenRoleNotExists() {
+        when(rolRepository.findById(newUser.getRol().getIdRol())).thenReturn(Mono.empty());
+
+        Mono<User> result = saveUserUseCase.execute(newUser);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof BusinessException &&
+                                ((BusinessException) throwable).getCode().equals(ResponseCode.ROLE_NOT_EXISTS))
+                .verify();
+    }
+
+    @Test
     void shouldThrowBusinessExceptionWhenEmailAlreadyExists() {
+        when(rolRepository.findById(newUser.getRol().getIdRol())).thenReturn(Mono.just(adminRol));
         when(userRepository.findByEmail(newUser.getEmail())).thenReturn(Mono.just(existingByEmail));
 
         Mono<User> result = saveUserUseCase.execute(newUser);
@@ -89,6 +115,7 @@ class SaveUserUseCaseTest {
 
     @Test
     void shouldThrowBusinessExceptionWhenIdentificationAlreadyExists() {
+        when(rolRepository.findById(newUser.getRol().getIdRol())).thenReturn(Mono.just(adminRol));
         when(userRepository.findByEmail(newUser.getEmail())).thenReturn(Mono.empty());
         when(userRepository.findByIdentification(newUser.getIdentityDocument())).thenReturn(Mono.just(existingByIdentification));
 

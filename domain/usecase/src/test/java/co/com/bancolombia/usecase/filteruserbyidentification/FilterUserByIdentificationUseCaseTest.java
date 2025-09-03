@@ -30,7 +30,7 @@ class FilterUserByIdentificationUseCaseTest {
     @BeforeEach
     void setUp() {
         user = User.builder()
-                .idUser(1)
+                .idUser(1L)
                 .names("Jane")
                 .lastNames("Smith")
                 .email("jane.smith@example.com")
