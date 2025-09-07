@@ -1,6 +1,8 @@
 package co.com.bancolombia.api.exceptions;
 
-import co.com.bancolombia.model.exceptions.*;
+import co.com.bancolombia.exceptions.BusinessException;
+import co.com.bancolombia.exceptions.BusinessUnAuthorizedException;
+import co.com.bancolombia.exceptions.TechnicalException;
 import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;

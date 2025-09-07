@@ -1,9 +1,9 @@
 package co.com.bancolombia.api.exceptions;
 
-import co.com.bancolombia.model.exceptions.BusinessException;
-import co.com.bancolombia.model.exceptions.BusinessUnAuthorizedException;
-import co.com.bancolombia.model.exceptions.TechnicalException;
-import co.com.bancolombia.model.responsecode.ResponseCode;
+import co.com.bancolombia.exceptions.BusinessException;
+import co.com.bancolombia.exceptions.BusinessUnAuthorizedException;
+import co.com.bancolombia.exceptions.TechnicalException;
+import co.com.bancolombia.responsecode.ResponseCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;

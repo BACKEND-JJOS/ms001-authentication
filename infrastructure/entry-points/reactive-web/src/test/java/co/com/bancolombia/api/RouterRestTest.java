@@ -2,28 +2,23 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.auth.JwtUtils;
 import co.com.bancolombia.api.auth.PasswordUtils;
-import co.com.bancolombia.api.auth.SecurityConfig;
-import co.com.bancolombia.api.auth.filter.JwtTokenValidatorFilter;
 import co.com.bancolombia.api.exceptions.GlobalExceptionHandler;
 import co.com.bancolombia.api.request.UserLoginRequest;
 import co.com.bancolombia.api.request.UserRequest;
 import co.com.bancolombia.api.response.ApiResponse;
-import co.com.bancolombia.model.exceptions.BusinessException;
-import co.com.bancolombia.model.exceptions.BusinessUnAuthorizedException;
-import co.com.bancolombia.model.responsecode.ResponseCode;
+import co.com.bancolombia.exceptions.BusinessException;
+import co.com.bancolombia.exceptions.BusinessUnAuthorizedException;
+import co.com.bancolombia.responsecode.ResponseCode;
+import co.com.bancolombia.model.rol.Rol;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.usecase.authuser.AuthUserUseCase;
 import co.com.bancolombia.usecase.filteruserbyidentification.FilterUserByIdentificationUseCase;
 import co.com.bancolombia.usecase.saveuser.SaveUserUseCase;
-import com.auth0.jwt.interfaces.Claim;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -93,6 +88,8 @@ class RouterRestTest {
                 .phone("3001234567")
                 .email("juan@test.com")
                 .baseSalary(BigDecimal.valueOf(5000000))
+                .password("encodedPass")
+                .rol(Rol.builder().idRol(1L).name("ROL_ADMIN").build())
                 .build();
     }
 
@@ -178,7 +175,7 @@ class RouterRestTest {
         given(jwtUtils.createToken(anyString(), anyString(), anyString(), any())).willReturn("fakeToken");
 
         webTestClient.post()
-                .uri("/v1/user/login")
+                .uri("/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()

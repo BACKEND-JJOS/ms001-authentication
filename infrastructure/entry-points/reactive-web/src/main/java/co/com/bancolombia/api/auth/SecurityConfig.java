@@ -2,8 +2,8 @@ package co.com.bancolombia.api.auth;
 
 import co.com.bancolombia.api.auth.filter.JwtTokenValidatorFilter;
 import co.com.bancolombia.api.exceptions.ForbiddenUnAuthorizedException;
-import co.com.bancolombia.model.exceptions.BusinessUnAuthorizedException;
-import co.com.bancolombia.model.responsecode.ResponseCode;
+import co.com.bancolombia.exceptions.BusinessUnAuthorizedException;
+import co.com.bancolombia.responsecode.ResponseCode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -34,6 +34,7 @@ public class SecurityConfig {
                         .pathMatchers("/doc/swagger-ui/**", "/doc/api-docs/**", "/v3/api-docs/**").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/v1/user/**").hasAnyRole("ADMIN", "ASESOR")
+                        .pathMatchers(HttpMethod.GET, "/v1/user/**").hasAnyRole("CLIENTE")
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(jwtTokenValidatorFilter, SecurityWebFiltersOrder.AUTHENTICATION)

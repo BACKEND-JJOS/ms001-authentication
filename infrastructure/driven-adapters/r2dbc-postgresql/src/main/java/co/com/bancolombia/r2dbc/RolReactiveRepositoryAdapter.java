@@ -1,10 +1,9 @@
 package co.com.bancolombia.r2dbc;
 
-import co.com.bancolombia.model.exceptions.TechnicalException;
-import co.com.bancolombia.model.responsecode.ResponseCode;
+import co.com.bancolombia.exceptions.TechnicalException;
+import co.com.bancolombia.responsecode.ResponseCode;
 import co.com.bancolombia.model.rol.Rol;
 import co.com.bancolombia.model.rol.gateways.RolRepository;
-import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.r2dbc.entity.RolEntity;
 import co.com.bancolombia.r2dbc.helper.ReactiveAdapterOperations;
 import lombok.extern.slf4j.Slf4j;

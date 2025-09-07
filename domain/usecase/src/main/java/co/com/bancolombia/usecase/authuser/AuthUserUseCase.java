@@ -1,7 +1,7 @@
 package co.com.bancolombia.usecase.authuser;
 
-import co.com.bancolombia.model.exceptions.BusinessUnAuthorizedException;
-import co.com.bancolombia.model.responsecode.ResponseCode;
+import co.com.bancolombia.exceptions.BusinessUnAuthorizedException;
+import co.com.bancolombia.responsecode.ResponseCode;
 import co.com.bancolombia.model.rol.gateways.RolRepository;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.gateways.UserRepository;

@@ -3,7 +3,7 @@ package co.com.bancolombia.api.validator;
 
 
 import co.com.bancolombia.api.exceptions.ValidationException;
-import co.com.bancolombia.model.responsecode.ResponseCode;
+import co.com.bancolombia.responsecode.ResponseCode;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

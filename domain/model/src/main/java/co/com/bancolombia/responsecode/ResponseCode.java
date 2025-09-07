@@ -1,4 +1,4 @@
-package co.com.bancolombia.model.responsecode;
+package co.com.bancolombia.responsecode;
 
 public class ResponseCode {
     private ResponseCode() {

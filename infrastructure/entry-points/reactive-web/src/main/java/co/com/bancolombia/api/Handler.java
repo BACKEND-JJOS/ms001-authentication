@@ -2,13 +2,14 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.auth.JwtUtils;
 import co.com.bancolombia.api.auth.PasswordUtils;
-import co.com.bancolombia.model.exceptions.BusinessUnAuthorizedException;
+import co.com.bancolombia.api.mapper.UserResponseMapper;
+import co.com.bancolombia.exceptions.BusinessUnAuthorizedException;
 import co.com.bancolombia.api.mapper.UserRequestMapper;
 import co.com.bancolombia.api.request.UserLoginRequest;
 import co.com.bancolombia.api.request.UserRequest;
 import co.com.bancolombia.api.response.ApiResponse;
 import co.com.bancolombia.api.validator.GenericValidator;
-import co.com.bancolombia.model.responsecode.ResponseCode;
+import co.com.bancolombia.responsecode.ResponseCode;
 import co.com.bancolombia.usecase.authuser.AuthUserUseCase;
 import co.com.bancolombia.usecase.filteruserbyidentification.FilterUserByIdentificationUseCase;
 import co.com.bancolombia.usecase.saveuser.SaveUserUseCase;
@@ -40,13 +41,14 @@ public class Handler {
         log.info("MESSAGE_HANDLER_LOG_TRACE : INIT METHOD USER CREATE");
         return serverRequest.bodyToMono(UserRequest.class)
                 .flatMap(GenericValidator::validate)
-                .flatMap(userRequest -> {
-                    var user =  UserRequestMapper.toDomain(userRequest);
-                    user.setPassword(passwordUtils.encode(user.getPassword()));
-                    log.info("MESSAGE_HANDLER_LOG_TRACE : Received request to create user with email={}", user.getEmail());
-                    return saveUserUseCase.execute(user)
+                .map(UserRequestMapper::toDomain)
+                .flatMap(userDomain -> {
+                    userDomain.setPassword(passwordUtils.encode(userDomain.getPassword()));
+                    log.info("MESSAGE_HANDLER_LOG_TRACE : Received request to create user with email={}", userDomain.getEmail());
+                    return saveUserUseCase.execute(userDomain)
+                            .map(UserResponseMapper::toResponse)
                             .doOnSuccess(u -> log.info("MESSAGE_HANDLER_LOG_TRACE : Successfully created user with id={}", u.getIdUser()))
-                            .doOnError(err -> log.error("MESSAGE_HANDLER_LOG_TRACE : Error while creating user with email={} - {}", user.getEmail(), err.getMessage()))
+                            .doOnError(err -> log.error("MESSAGE_HANDLER_LOG_TRACE : Error while creating user with email={} - {}", userDomain.getEmail(), err.getMessage()))
                             .flatMap(savedUser -> buildResponse(savedUser, HttpStatus.CREATED.value(), ResponseCode.USER_CREATED_SUCCESSFULLY));
                 });
     }
@@ -58,6 +60,7 @@ public class Handler {
         return filterUserByIdentificationUseCase.execute(identification)
                 .doOnSuccess(user -> log.info("MESSAGE_HANDLER_LOG_TRACE : User found with identification={}", identification))
                 .doOnError(err -> log.error("MESSAGE_HANDLER_LOG_TRACE : Error searching user with identification={} - {}", identification, err.getMessage()))
+                .map(UserResponseMapper::toResponse)
                 .flatMap(user -> buildResponse(user, HttpStatus.OK.value(), ResponseCode.USER_FILTERED_SUCCESSFULLY))
                 .switchIfEmpty(buildResponse(null, HttpStatus.NOT_FOUND.value(), ResponseCode.USER_NOT_EXISTS));
     }

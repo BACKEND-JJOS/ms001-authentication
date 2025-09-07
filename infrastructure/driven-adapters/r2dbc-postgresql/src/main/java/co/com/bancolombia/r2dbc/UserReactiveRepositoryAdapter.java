@@ -1,7 +1,7 @@
 package co.com.bancolombia.r2dbc;
 
-import co.com.bancolombia.model.exceptions.TechnicalException;
-import co.com.bancolombia.model.responsecode.ResponseCode;
+import co.com.bancolombia.exceptions.TechnicalException;
+import co.com.bancolombia.responsecode.ResponseCode;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.gateways.UserRepository;
 import co.com.bancolombia.r2dbc.entity.UserEntity;
@@ -66,7 +66,7 @@ public class UserReactiveRepositoryAdapter
                         log.info("MESSAGE_ADAPTER_LOG_TRACE : No user found identification={}", identification);
                     }
                 })
-                .map(this::toEntity)
+                .map(UserMapper::toDomain)
                 .onErrorMap(throwable -> {
                     log.error("MESSAGE_ADAPTER_R2DBC_LOG_TRACE : DB error while finding user by identification ={} - {}",identification, throwable.getMessage());
                     return new TechnicalException(ResponseCode.DATA_BASE_FAILED);

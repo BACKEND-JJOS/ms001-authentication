@@ -24,7 +24,7 @@ public class RouterRest {
         return route()
                 .POST(BASE_PATH_AUTH_ROUTE,
                         handler::listenPOSTLogin,
-                        OpenApiDoc::createUser) //TODO:Crear api doc
+                        OpenApiDoc::createUser)
                 .POST(BASE_PATH_USER,
                         handler::listenPOSTCreateUserUseCase,
                         OpenApiDoc::createUser)
