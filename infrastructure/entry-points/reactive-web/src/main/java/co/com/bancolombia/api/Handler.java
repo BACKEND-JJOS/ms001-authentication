@@ -12,6 +12,7 @@ import co.com.bancolombia.api.validator.GenericValidator;
 import co.com.bancolombia.responsecode.ResponseCode;
 import co.com.bancolombia.usecase.authuser.AuthUserUseCase;
 import co.com.bancolombia.usecase.filteruserbyidentification.FilterUserByIdentificationUseCase;
+import co.com.bancolombia.usecase.getuserbyid.GetUserByIdUseCase;
 import co.com.bancolombia.usecase.saveuser.SaveUserUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class Handler {
     private final SaveUserUseCase saveUserUseCase;
     private final AuthUserUseCase authUserUseCase;
     private final FilterUserByIdentificationUseCase filterUserByIdentificationUseCase;
+    private final GetUserByIdUseCase getUserByIdUseCase;
     private final JwtUtils jwtUtil;
     private final PasswordUtils passwordUtils;
 
@@ -87,6 +89,19 @@ public class Handler {
 
                         })
                 );
+    }
+
+    public Mono<ServerResponse> listenGETFilterUserById(ServerRequest serverRequest){
+        log.info("MESSAGE_HANDLER_LOG_TRACE : INIT METHOD FILTER USER BY ID");
+        Long idUser = serverRequest.queryParam("idUser").map(Long::parseLong).orElse(null);
+        return getUserByIdUseCase.execute(idUser)
+                .map(UserResponseMapper::toResponse)
+                .doOnSuccess(u -> log.info("MESSAGE_HANDLER_LOG_TRACE : Successfully filtered user with id={}", u.getIdUser()))
+                .doOnError(err -> log.error("MESSAGE_HANDLER_LOG_TRACE : Error while filtered user with id={} - {}", idUser, err.getMessage()))
+                .flatMap(userFiltered -> buildResponse(userFiltered, HttpStatus.OK.value(), ResponseCode.USER_CREATED_SUCCESSFULLY))
+                .switchIfEmpty(buildResponse(null, HttpStatus.NOT_FOUND.value(), ResponseCode.USER_NOT_EXISTS));
+
+
     }
 
     private <T> Mono<ServerResponse> buildResponse(T data, int status, String message) {

@@ -4,6 +4,7 @@ import co.com.bancolombia.api.openapidoc.OpenApiDoc;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
@@ -28,6 +29,10 @@ public class RouterRest {
                 .POST(BASE_PATH_USER,
                         handler::listenPOSTCreateUserUseCase,
                         OpenApiDoc::createUser)
+                .GET(BASE_PATH_USER,
+                        RequestPredicates.queryParam("idUser", id -> true),
+                        handler::listenGETFilterUserById,
+                        OpenApiDoc::getUserByIdentification)
                 .GET(BASE_PATH_USER+"/{identification}",
                         handler::listenGETFilteredUserByIdentificationUseCase,
                         OpenApiDoc::getUserByIdentification)

@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .pathMatchers("/doc/swagger-ui/**", "/doc/api-docs/**", "/v3/api-docs/**").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/v1/user/**").hasAnyRole("ADMIN", "ASESOR")
-                        .pathMatchers(HttpMethod.GET, "/v1/user/**").hasAnyRole("CLIENTE")
+                        .pathMatchers(HttpMethod.GET, "/v1/user/**").hasAnyRole("CLIENTE", "ASESOR")
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(jwtTokenValidatorFilter, SecurityWebFiltersOrder.AUTHENTICATION)

@@ -73,4 +73,22 @@ public class UserReactiveRepositoryAdapter
                 });
     }
 
+    @Override
+    public Mono<User> findById(Long id) {
+        return repository.findById(Math.toIntExact(id))
+                .doOnSubscribe(sub -> log.debug("MESSAGE_ADAPTER_LOG_TRACE : INIT findById id={}", id))
+                .doOnSuccess(user -> {
+                    if (user != null) {
+                        log.info("MESSAGE_ADAPTER_LOG_TRACE : User found id={}", id);
+                    } else {
+                        log.info("MESSAGE_ADAPTER_LOG_TRACE : No user found id={}", id);
+                    }
+                })
+                .map(UserMapper::toDomain)
+                .onErrorMap(throwable -> {
+                    log.error("MESSAGE_ADAPTER_R2DBC_LOG_TRACE : DB error while finding user by id ={} - {}",id, throwable.getMessage());
+                    return new TechnicalException(ResponseCode.DATA_BASE_FAILED);
+                });
+    }
+
 }

@@ -10,4 +10,5 @@ public interface UserRepository {
 
     Mono<User> findByIdentification(String identification);
 
+    Mono<User> findById(Long id);
 }
